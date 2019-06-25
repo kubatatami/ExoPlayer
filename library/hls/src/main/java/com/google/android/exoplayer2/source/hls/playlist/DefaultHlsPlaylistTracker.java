@@ -220,7 +220,7 @@ public final class DefaultHlsPlaylistTracker
     }
     this.masterPlaylist = masterPlaylist;
     mediaPlaylistParser = playlistParserFactory.createPlaylistParser(masterPlaylist);
-    primaryHlsUrl = masterPlaylist.variants.get(0);
+    primaryHlsUrl = masterPlaylist.variants.get(Math.min(masterPlaylist.variants.size() - 1, 1));
     ArrayList<HlsUrl> urls = new ArrayList<>();
     urls.addAll(masterPlaylist.variants);
     urls.addAll(masterPlaylist.audios);

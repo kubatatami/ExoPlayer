@@ -475,25 +475,7 @@ import java.util.List;
       HlsMediaPlaylist mediaPlaylist,
       long startOfPlaylistInPeriodUs,
       long loadPositionUs) {
-    if (previous == null || switchingVariant) {
-      long endOfPlaylistInPeriodUs = startOfPlaylistInPeriodUs + mediaPlaylist.durationUs;
-      long targetPositionInPeriodUs =
-          (previous == null || independentSegments) ? loadPositionUs : previous.startTimeUs;
-      if (!mediaPlaylist.hasEndTag && targetPositionInPeriodUs >= endOfPlaylistInPeriodUs) {
-        // If the playlist is too old to contain the chunk, we need to refresh it.
-        return mediaPlaylist.mediaSequence + mediaPlaylist.segments.size();
-      }
-      long targetPositionInPlaylistUs = targetPositionInPeriodUs - startOfPlaylistInPeriodUs;
-      return Util.binarySearchFloor(
-              mediaPlaylist.segments,
-              /* value= */ targetPositionInPlaylistUs,
-              /* inclusive= */ true,
-              /* stayInBounds= */ !playlistTracker.isLive() || previous == null)
-          + mediaPlaylist.mediaSequence;
-    }
-    // We ignore the case of previous not having loaded completely, in which case we load the next
-    // segment.
-    return previous.getNextChunkIndex();
+    return previous == null ? mediaPlaylist.mediaSequence : previous.getNextChunkIndex();
   }
 
   private long resolveTimeToLiveEdgeUs(long playbackPositionUs) {
