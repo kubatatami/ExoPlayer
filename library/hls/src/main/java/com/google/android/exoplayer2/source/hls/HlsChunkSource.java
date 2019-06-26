@@ -481,14 +481,14 @@ import java.util.stream.Collectors;
       long endOfPlaylistInPeriodUs = startOfPlaylistInPeriodUs + mediaPlaylist.durationUs;
       long targetPositionInPeriodUs =
           (previous == null || independentSegments) ? loadPositionUs : previous.startTimeUs;
+      String segments = mediaPlaylist.segments.stream().map(segment -> segment.url).collect(Collectors.joining(" "));
       if (!mediaPlaylist.hasEndTag && targetPositionInPeriodUs >= endOfPlaylistInPeriodUs) {
         // If the playlist is too old to contain the chunk, we need to refresh it.
         long res = mediaPlaylist.mediaSequence + mediaPlaylist.segments.size();
-        Log.i("HQStreamHls-Controller", String.format("playlist is too old res: %d mediaSequence: %d size: %d", res, mediaPlaylist.mediaSequence, mediaPlaylist.segments.size()));
+        Log.i("HQStreamHls-Controller", String.format("playlist is too old res: %d mediaSequence: %d size: %d segments: %s", res, mediaPlaylist.mediaSequence, mediaPlaylist.segments.size(), segments));
         return res;
       }
       long targetPositionInPlaylistUs = targetPositionInPeriodUs - startOfPlaylistInPeriodUs;
-      String segments = mediaPlaylist.segments.stream().map(segment -> segment.url).collect(Collectors.joining(" "));
       long search = Util.binarySearchFloor(
           mediaPlaylist.segments,
           /* value= */ targetPositionInPlaylistUs,
