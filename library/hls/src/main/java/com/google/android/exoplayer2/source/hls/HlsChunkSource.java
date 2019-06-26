@@ -18,6 +18,7 @@ package com.google.android.exoplayer2.source.hls;
 import android.net.Uri;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.BehindLiveWindowException;
@@ -481,15 +482,19 @@ import java.util.List;
           (previous == null || independentSegments) ? loadPositionUs : previous.startTimeUs;
       if (!mediaPlaylist.hasEndTag && targetPositionInPeriodUs >= endOfPlaylistInPeriodUs) {
         // If the playlist is too old to contain the chunk, we need to refresh it.
-        return mediaPlaylist.mediaSequence + mediaPlaylist.segments.size();
+        long res = mediaPlaylist.mediaSequence + mediaPlaylist.segments.size();
+        Log.i("HQStreamHls-Controller", String.format("playlist is too old res: %d mediaSequence: %d size: %d", res, mediaPlaylist.mediaSequence, mediaPlaylist.segments.size()));
+        return res;
       }
       long targetPositionInPlaylistUs = targetPositionInPeriodUs - startOfPlaylistInPeriodUs;
-      return Util.binarySearchFloor(
-              mediaPlaylist.segments,
-              /* value= */ targetPositionInPlaylistUs,
-              /* inclusive= */ true,
-              /* stayInBounds= */ !playlistTracker.isLive() || previous == null)
-          + mediaPlaylist.mediaSequence;
+      long search = Util.binarySearchFloor(
+          mediaPlaylist.segments,
+          /* value= */ targetPositionInPlaylistUs,
+          /* inclusive= */ true,
+          /* stayInBounds= */ !playlistTracker.isLive() || previous == null);
+      long res = search + mediaPlaylist.mediaSequence;
+      Log.i("HQStreamHls-Controller", String.format("playlist search res: %d mediaSequence: %d search: %d size: %d", res, mediaPlaylist.mediaSequence, search, mediaPlaylist.segments.size()));
+      return res;
     }
     // We ignore the case of previous not having loaded completely, in which case we load the next
     // segment.
