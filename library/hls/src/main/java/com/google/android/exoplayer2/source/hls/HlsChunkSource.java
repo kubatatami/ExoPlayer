@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Source of Hls (possibly adaptive) chunks.
@@ -487,13 +488,14 @@ import java.util.List;
         return res;
       }
       long targetPositionInPlaylistUs = targetPositionInPeriodUs - startOfPlaylistInPeriodUs;
+      String segments = mediaPlaylist.segments.stream().map(segment -> segment.url).collect(Collectors.joining(" "));
       long search = Util.binarySearchFloor(
           mediaPlaylist.segments,
           /* value= */ targetPositionInPlaylistUs,
           /* inclusive= */ true,
           /* stayInBounds= */ !playlistTracker.isLive() || previous == null);
       long res = search + mediaPlaylist.mediaSequence;
-      Log.i("HQStreamHls-Controller", String.format("playlist search res: %d mediaSequence: %d search: %d size: %d", res, mediaPlaylist.mediaSequence, search, mediaPlaylist.segments.size()));
+      Log.i("HQStreamHls-Controller", String.format("playlist search res: %d mediaSequence: %d search: %d size: %d segments: %s", res, mediaPlaylist.mediaSequence, search, mediaPlaylist.segments.size(), segments));
       return res;
     }
     // We ignore the case of previous not having loaded completely, in which case we load the next
